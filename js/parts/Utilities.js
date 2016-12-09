@@ -25,14 +25,16 @@ var charts = H.charts,
  *
  * @function #error
  * @memberOf Highcharts
- * @param {Number} code - The error code. See [errors.xml]{@link 
+ * @param {Number|String} code - The error code. See [errors.xml]{@link 
  *     https://github.com/highcharts/highcharts/blob/master/errors/errors.xml}
- *     for available codes.
+ *     for available codes. If it is a string, the error message is printed
+ *     directly in the console.
  * @param {Boolean} [stop=false] - Whether to throw an error or just log a 
  *     warning in the console.
  */
 H.error = function (code, stop) {
-	var msg = 'Highcharts error #' + code + ': www.highcharts.com/errors/' +
+	var msg = H.isNumber(code) ?
+		'Highcharts error #' + code + ': www.highcharts.com/errors/' + code :
 		code;
 	if (stop) {
 		throw new Error(msg);
@@ -91,9 +93,7 @@ H.Fx.prototype = {
 		} else {
 			ret = end;
 		}
-		this.elem.animProp = 'd';
-		this.elem.attr('d', ret);
-		this.elem.animProp = null;
+		this.elem.attr('d', ret, null, true);
 	},
 
 	/**
@@ -115,9 +115,7 @@ H.Fx.prototype = {
 		// Other animations on SVGElement
 		} else if (elem.attr) {
 			if (elem.element) {
-				elem.animProp = prop;
-				elem.attr(prop, now);
-				elem.animProp = null;
+				elem.attr(prop, now, null, true);
 			}
 
 		// HTML styles, raw HTML content like container size
@@ -251,7 +249,7 @@ H.Fx.prototype = {
 			isArea = elem.isArea,
 			positionFactor = isArea ? 2 : 1,
 			reverse;
-		
+
 		/**
 		 * In splines make moveTo and lineTo points have six parameters like
 		 * bezier curves, to allow animation one-to-one.
@@ -266,7 +264,7 @@ H.Fx.prototype = {
 				// three places behind (#5788)
 				isOperator = arr[i] === 'M' || arr[i] === 'L';
 				nextIsOperator = /[a-zA-Z]/.test(arr[i + 3]);
-				if (isOperator && !nextIsOperator) {
+				if (isOperator && nextIsOperator) {
 					arr.splice(
 						i + 1, 0,
 						arr[i + 1], arr[i + 2],
@@ -1307,7 +1305,8 @@ H.timeUnits = {
  * @function #numberFormat
  * @memberOf Highcharts
  * @param {Number} number - The input number to format.
- * @param {Number} decimals - The amount of decimals.
+ * @param {Number} decimals - The amount of decimals. A value of -1 preserves
+ *        the amount in the input number.
  * @param {String} [decimalPoint] - The decimal point, defaults to the one given
  *        in the lang options.
  * @param {String} [thousandsSep] - The thousands separator, defaults to the one
@@ -1434,6 +1433,22 @@ H.inArray = function (item, arr) {
  */
 H.grep = function (arr, callback) {
 	return [].filter.call(arr, callback);
+};
+
+/**
+ * Return the value of the first element in the array that satisfies the 
+ * provided testing function.
+ *
+ * @function #find
+ * @memberOf Highcharts
+ * @param {Array} arr - The array to test.
+ * @param {Function} callback - The callback function. The function receives the
+ *        item as the first argument. Return `true` if this item satisfies the
+ *        condition.
+ * @returns {Mixed} - The value of the element.
+ */
+H.find = function (arr, callback) {
+	return [].find.call(arr, callback);
 };
 
 /**
@@ -1984,6 +1999,19 @@ if (!Array.prototype.filter) {
 		}
 
 		return ret;
+	};
+}
+
+if (!Array.prototype.find) {
+	H.find = function (arr, fn) {
+		var i,
+			length = arr.length;
+
+		for (i = 0; i < length; i++) {
+			if (fn(arr[i], i)) {
+				return arr[i];
+			}
+		}
 	};
 }
 

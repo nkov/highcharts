@@ -277,7 +277,11 @@ Series.prototype.drawDataLabels = function () {
 					)
 					.attr(attr);
 
-					dataLabel.addClass('highcharts-data-label-color-' + point.colorIndex + ' ' + (options.className || ''));
+					dataLabel.addClass(
+						'highcharts-data-label-color-' + point.colorIndex +
+						' ' + (options.className || '') +
+						(options.useHTML ? 'highcharts-tracker' : '') // #3398
+					);
 
 					/*= if (build.classic) { =*/
 					// Styles must be applied before add in order to read text bounding box
@@ -319,8 +323,19 @@ Series.prototype.alignDataLabel = function (point, dataLabel, options, alignTo, 
 		align = options.align,
 		rotCorr, // rotation correction
 		// Math.round for rounding errors (#2683), alignTo to allow column labels (#2700)
-		visible = this.visible && (point.series.forceDL || chart.isInsidePlot(plotX, Math.round(plotY), inverted) ||
-			(alignTo && chart.isInsidePlot(plotX, inverted ? alignTo.x + 1 : alignTo.y + alignTo.height - 1, inverted))),
+		visible = 
+			this.visible &&
+			(
+				point.series.forceDL ||
+				chart.isInsidePlot(plotX, Math.round(plotY), inverted) ||
+				(
+					alignTo && chart.isInsidePlot(
+						plotX,
+						inverted ? alignTo.x + 1 : alignTo.y + alignTo.height - 1,
+						inverted
+					)
+				)
+			),
 		alignAttr, // the final position;
 		justify = pick(options.overflow, 'justify') === 'justify';
 

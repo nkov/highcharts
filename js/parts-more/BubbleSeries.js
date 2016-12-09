@@ -222,7 +222,10 @@ seriesType('bubble', 'scatter', {
 	 */
 	drawLegendSymbol: function (legend, item) {
 		var renderer = this.chart.renderer,
-			radius = renderer.fontMetrics(legend.itemStyle.fontSize).f / 2;
+			radius = renderer.fontMetrics(
+				legend.itemStyle && legend.itemStyle.fontSize,
+				item.legendItem
+			).f / 2;
 
 		item.legendSymbol = renderer.circle(
 			radius,
@@ -245,7 +248,7 @@ seriesType('bubble', 'scatter', {
 	haloPath: function (size) {
 		return Point.prototype.haloPath.call(
 			this, 
-			this.shapeArgs.r + size
+			size === 0 ? 0 : this.shapeArgs.r + size // #6067
 		);
 	},
 	ttBelow: false
