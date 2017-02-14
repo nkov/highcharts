@@ -128,26 +128,8 @@ Axis.prototype.getTimeTicks = function (normalizedInterval, min, max, startOfWee
 
 			// if the interval is months, use Date.UTC to increase months
 			} else if (interval === timeUnits.month) {
-				var curMonth = minMonth + i * count;
-				// var curDay = 1;
-				// if (endOfMonth) {
-				// 	switch (curMonth % 12) {
-				// 	case 0:
-				// 	case 2:
-				// 	case 4:
-				// 	case 6:
-				// 	case 7:
-				// 	case 9:
-				// 	case 11:
-				// 		curDay = 31; break;
-				// 	case 1: 
-				// 		curDay = 28; break;
-				// 	default:
-				// 		curDay = 30;
-				// 	}
-				// }
-				var curDay = endOfMonth ? 0 : 1;
-				time = makeTime(minYear, curMonth, curDay);
+				var minDay = endOfMonth ? 0 : 1;
+				time = makeTime(minYear, minMonth + i * count, minDay);
 
 			// if we're using global time, the interval is not fixed as it jumps
 			// one hour at the DST crossover
